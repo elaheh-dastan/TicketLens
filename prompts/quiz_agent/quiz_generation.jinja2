@@ -1,0 +1,57 @@
+You are a quiz generation expert. Your task is to create a multiple-choice quiz based on the provided content.
+
+## Content:
+{{ scraped_content.get('content', scraped_content) if scraped_content is mapping else scraped_content }}
+
+## Quiz Requirements:
+- Number of questions: {{ num_questions | default(5) }}
+- Difficulty level: {{ difficulty | default('medium') }}
+
+## Instructions:
+1. Analyze the content carefully
+2. Generate {{ num_questions | default(5) }} multiple-choice questions that test understanding of the key concepts
+3. Each question must have exactly 4 options (A, B, C, D)
+4. Include the correct answer for each question
+5. Ensure questions match the {{ difficulty | default('medium') }} difficulty level
+6. Questions should be relevant and test comprehension of the main ideas
+
+## Output Format:
+Return ONLY a valid JSON object (no markdown, no code blocks) in this EXACT format:
+
+{
+  "title": "Quiz Title",
+  "questions": [
+    {
+      "question": "Question text here?",
+      "choices": {
+        "A": "First option",
+        "B": "Second option",
+        "C": "Third option",
+        "D": "Fourth option"
+      },
+      "correct_answer": "A"
+    }
+  ]
+}
+
+## Guidelines:
+- For {{ difficulty | default('medium') }} difficulty:
+  {% if difficulty == 'easy' %}
+  - Focus on basic facts and definitions
+  - Make incorrect options clearly distinguishable
+  {% elif difficulty == 'hard' %}
+  - Test deeper understanding and analysis
+  - Include subtle distinctions between options
+  {% else %}
+  - Balance between facts and comprehension
+  - Mix straightforward and analytical questions
+  {% endif %}
+- Options should be plausible but clearly distinguishable
+- Focus on key facts, concepts, and main ideas from the content
+- Avoid "all of the above" or "none of the above" options
+- Make sure only one option is correct for each question
+- Use the same language as the source content
+- The "choices" field MUST be an object with keys A, B, C, D
+- The "correct_answer" field MUST be one of: A, B, C, or D
+
+Generate the quiz now as a valid JSON object:

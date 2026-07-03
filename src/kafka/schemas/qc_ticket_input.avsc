@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "QCTicketInputEvent",
+  "namespace": "com.ticketlens.qc",
+  "fields": [
+    {"name": "chat_id", "type": "string"},
+    {
+      "name": "chat_conversation",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "ChatMessage",
+          "fields": [
+            {"name": "role", "type": "string"},
+            {"name": "message", "type": "string"},
+            {"name": "timestamp", "type": "string"}
+          ]
+        }
+      }
+    },
+    {"name": "source", "type": "string"},
+    {"name": "time_stamp", "type": "double"},
+    {"name": "event_name", "type": "string"}
+  ]
+}

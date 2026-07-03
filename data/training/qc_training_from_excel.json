@@ -1,0 +1,72 @@
+{
+  "dataset_name": "qc_training_sample",
+  "created_at": "2026-01-01T00:00:00",
+  "source_file": "data/training/sample_chat_to_improve_qc.xlsx",
+  "total_rows": 2,
+  "converted_examples": 2,
+  "skipped_rows": 0,
+  "examples": [
+    {
+      "chat_conversation": [
+        {
+          "role": "customer",
+          "message": "Hi, the app keeps logging me out every few minutes. It's really frustrating."
+        },
+        {
+          "role": "agent",
+          "message": "Hello! I'm sorry for the trouble. Could you try clearing the app cache from Settings and let me know if it helps?"
+        },
+        {
+          "role": "customer",
+          "message": "Okay, I'll try that."
+        },
+        {
+          "role": "agent",
+          "message": "Great, thank you. If it happens again, please let us know and we'll investigate the session settings on our side."
+        }
+      ],
+      "main_problem": "Customer is repeatedly logged out of the app during a session.",
+      "reasons": "The agent offered a reasonable first troubleshooting step and invited follow-up, but did not confirm the issue was resolved.",
+      "score": 7.0,
+      "tone_score": 8,
+      "empathy_score": 7,
+      "resolution_quality": 6,
+      "clarity_score": 8,
+      "chat_id": "CHAT0001",
+      "agent_name": "Agent A",
+      "user_rating": "positive",
+      "key_observations": "No clear confirmation that the problem was solved; follow-up left open."
+    },
+    {
+      "chat_conversation": [
+        {
+          "role": "customer",
+          "message": "Why hasn't my withdrawal been processed yet? It's been hours."
+        },
+        {
+          "role": "agent",
+          "message": "I understand the wait is stressful. Let me check the status for you right away."
+        },
+        {
+          "role": "customer",
+          "message": "Thanks, please hurry."
+        },
+        {
+          "role": "agent",
+          "message": "Your request is in the final review queue and should complete within the hour. I'll stay with you until it's done."
+        }
+      ],
+      "main_problem": "Customer is anxious about a delayed withdrawal request.",
+      "reasons": "The agent acknowledged the customer's frustration, set a clear expectation, and offered to stay engaged until resolution.",
+      "score": 8.5,
+      "tone_score": 9,
+      "empathy_score": 9,
+      "resolution_quality": 8,
+      "clarity_score": 9,
+      "chat_id": "CHAT0002",
+      "agent_name": "Agent B",
+      "user_rating": "positive",
+      "key_observations": "Strong empathy and clear expectation-setting; good ownership of the issue."
+    }
+  ]
+}

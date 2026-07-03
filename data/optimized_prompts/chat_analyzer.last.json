@@ -1,0 +1,37 @@
+{
+  "node_name": "chat_analyzer",
+  "module_type": "ChainOfThought",
+  "module_state": {
+    "predict": {
+      "traces": [],
+      "train": [],
+      "demos": [],
+      "signature": {
+        "instructions": "You are a QC analyst reviewing customer support chats. Your task is to identify the MAIN problem the customer is experiencing.\n\nAnalysis guidelines:\n1. Read through all messages to understand the full conversation context\n2. Focus on the customer's initial issue and how it evolved\n3. Identify what the customer ultimately needed help with\n4. Ignore minor details - extract the core problem\n\nOutput: A clear, specific description of the main problem in 1-2 sentences.",
+        "fields": [
+          {
+            "prefix": "Chat Conversation:",
+            "description": "Complete customer support chat conversation with messages from customer and agent. Each message has role (customer/agent), message content, and timestamp. Analyze the full conversation flow to understand the customer's issue."
+          },
+          {
+            "prefix": "Reasoning: Let's think step by step in order to",
+            "description": "${reasoning}"
+          },
+          {
+            "prefix": "Main Problem:",
+            "description": "The main problem or issue the customer is experiencing. Be specific and concise - describe what the customer needs help with in 1-2 sentences."
+          }
+        ]
+      },
+      "lm": null
+    }
+  },
+  "metrics": {
+    "average_metric": 0.0,
+    "num_training": 38,
+    "num_validation": 10,
+    "timestamp": "2026-01-31T04:47:35.245334"
+  },
+  "version": "20260131_044735",
+  "optimized_at": "2026-01-31T04:47:35.245582"
+}

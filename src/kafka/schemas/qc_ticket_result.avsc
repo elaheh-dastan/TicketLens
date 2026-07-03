@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "QCTicketResultEvent",
+  "namespace": "com.ticketlens.qc",
+  "fields": [
+    {"name": "chat_id", "type": "string"},
+    {"name": "main_problem", "type": "string"},
+    {"name": "score", "type": "string"},
+    {"name": "tone_score", "type": "string"},
+    {"name": "empathy_score", "type": "string"},
+    {"name": "solution_quality", "type": "string"},
+    {"name": "clarity_score", "type": "string"},
+    {"name": "key_observations", "type": {"type": "array", "items": "string"}},
+    {"name": "reasons", "type": "string"},
+    {"name": "time_stamp", "type": "double"},
+    {"name": "event_name", "type": "string"}
+  ]
+}

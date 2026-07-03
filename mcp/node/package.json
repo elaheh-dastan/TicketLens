@@ -1,0 +1,16 @@
+{
+  "name": "general-agent-framework-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Node tooling for MCP servers used by general-agent-framework",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "install-mcp": "npm install",
+    "start-chrome-mcp": "npx chrome-devtools-mcp"
+  },
+  "dependencies": {
+    "chrome-devtools-mcp": "github:ChromeDevTools/chrome-devtools-mcp"
+  }
+}

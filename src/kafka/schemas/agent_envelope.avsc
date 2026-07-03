@@ -1,0 +1,66 @@
+{
+  "type": "record",
+  "name": "AgentEnvelope",
+  "namespace": "com.ticketlens.agent",
+  "doc": "AgentEnvelope pattern for Kafka messages. Standard message format for agent results.",
+  "fields": [
+    {
+      "name": "meta",
+      "type": {
+        "type": "record",
+        "name": "EnvelopeMeta",
+        "doc": "Metadata section of AgentEnvelope",
+        "fields": [
+          {
+            "name": "message_type",
+            "type": {
+              "type": "enum",
+              "name": "MessageType",
+              "doc": "Enumeration of message types",
+              "symbols": ["agent_input", "agent_result", "agent_status", "agent_error"]
+            },
+            "doc": "Type of message (agent_result, agent_status, agent_error)"
+          },
+          {
+            "name": "source_agent",
+            "type": "string",
+            "doc": "Name of the agent that produced this message"
+          },
+          {
+            "name": "correlation_id",
+            "type": "string",
+            "doc": "Correlation ID to track the request (typically task_id)"
+          },
+          {
+            "name": "timestamp",
+            "type": "string",
+            "doc": "ISO 8601 timestamp when the message was created"
+          }
+        ]
+      },
+      "doc": "Message metadata including type, source, and correlation ID"
+    },
+    {
+      "name": "payload",
+      "type": "string",
+      "doc": "Agent-specific result data as JSON string",
+      "default": ""
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "EnvelopeStatus",
+        "doc": "Enumeration of envelope status values",
+        "symbols": ["COMPLETED", "FAILED", "PENDING", "RUNNING"]
+      },
+      "doc": "Execution status (COMPLETED, FAILED, PENDING, RUNNING)"
+    },
+    {
+      "name": "error",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Error message if status is FAILED, null otherwise"
+    }
+  ]
+}

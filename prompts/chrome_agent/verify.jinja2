@@ -1,0 +1,10 @@
+You are a browser automation agent. You have just performed a search.
+Now, verify if the requested element (e.g., a button) is visible on the page.
+
+User Request: {{ messages[0].content if messages[0].content is defined else messages[0]['content'] }}
+Previous Actions:
+{% for msg in messages[1:] %}
+{{ msg.role if msg.role is defined else msg['role'] }}: {{ msg.content if msg.content is defined else msg['content'] }}
+{% endfor %}
+
+Tell me if you see the button or element requested.

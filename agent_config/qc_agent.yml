@@ -1,0 +1,221 @@
+agent:
+  agent_name: "QC_Agent_DSPy"
+  description: "Quality Control agent for customer support chat evaluation using DSPy"
+  version: "1.0.0"
+
+
+  # State fields for QC evaluation
+  agent_state:
+    chat_id:
+      field_type: "str"
+      description: "Unique identifier for the chat conversation"
+      required: true
+    
+    chat_conversation:
+      field_type: "list"
+      description: "List of chat rounds with role and message"
+      required: true
+
+    key_observations:
+      field_type: "list"
+      description: "List of reasons"
+      required: true
+
+    correlation_id:
+      field_type: "str"
+      description: "Correlation ID for tracking"
+      required: false
+
+    main_problem:
+      field_type: "str"
+      description: "Main problem identified from conversation"
+      required: false
+
+    score:
+      field_type: "str"
+      description: "Overall quality score"
+      required: false
+
+    tone_score:
+      field_type: "str"
+      description: "tone score"
+      required: false
+
+    empathy_score:
+      field_type: "str"
+      description: "empathy score"
+      required: false
+
+    solution_quality:
+      field_type: "str"
+      description: "solution quality"
+      required: false
+
+    clarity_score:
+      field_type: "str"
+      description: "clarity score"
+      required: false
+
+    reasons:
+      field_type: "str"
+      description: "Reasons for the score"
+      required: false
+    
+
+  # LLM configuration
+  models:
+    generator: "openai/gpt-4o-mini"
+    provider: "openrouter"
+    temperature: 0.3
+    max_tokens: 2000
+
+  # Features configuration
+  features:
+    middleware:
+      model_retry: true
+      model_retry_retries: 3
+      tool_retry: true
+      tool_retry_retries: 2
+      summarization: false
+
+
+  # Graph definition - Pure agent logic, no Kafka I/O
+  graph:
+    entry_point: "input_validator"
+    
+    nodes:
+      # Validator node - validates chat data
+      input_validator:
+        type: "validator"
+        input_key: "chat_conversation"
+        output_key: "validated_chat"
+        schema:
+          type: "object"
+          required: ["chat_id", "chat_conversation"]
+          properties:
+            chat_id:
+              type: "string"
+            chat_conversation:
+              type: "array"
+              minItems: 1
+              items:
+                type: "object"
+                required: ["role", "message", "timestamp"]
+                properties:
+                  role:
+                    type: "string"
+                    enum: ["end_user", "support"]
+                  message:
+                    type: "string"
+                  timestamp:
+                    type: "string"
+        next: "chat_analyzer"
+      
+      # DSPy node - analyzes chat to identify main problem
+      chat_analyzer:
+        type: "dspy"
+        output_key: "analysis_result"
+        dspy:
+          enabled: true
+          model: "openai/gpt-4o-mini"
+          max_tokens: 2000
+          module: "ChainOfThought"
+          signature:
+            input_fields:
+              chat_conversation: "Complete customer support chat conversation with messages from end_user and support. Each message has role (end_user/support), message content, and timestamp. Analyze the full conversation flow to understand the end_user's issue."
+            output_fields:
+              main_problem: "The main problem or issue the customer is experiencing. Be specific and concise - describe what the customer needs help with in 1-2 sentences."
+              key_observations: "A list of short phrases telling how helpful and polite the answer to the end_user is"
+            instructions: |
+              You are a QC analyst reviewing customer support chats. Your task is to identify the MAIN problem the end_user is experiencing.
+
+              Analysis guidelines:
+              1. Read through all messages to understand the full conversation context
+              2. Focus on the end_user's initial issue and how it evolved
+              3. Identify what the end_user ultimately needed help with
+              4. Ignore minor details - extract the core problem
+              5. Support agents have access to internal systems and data not visible in the chat. If the agent states the problem is resolved based on data they can see (e.g., confirming a transaction, verifying account status), this is a completely appropriate response.
+
+              IMPORTANT: All output (main_problem and key_observations) MUST be written in Persian (Farsi).
+
+              Output: A clear, specific description of the main problem in 1-2 sentences and key observations.
+          optimization:
+            enabled: true
+            teleprompter: "MIPRO"
+            metric: "partial_match"
+            training_data_path: "data/training/qc_training_from_excel.json"
+            max_bootstrapped_demos: 8
+            max_labeled_demos: 4
+            num_candidates: 10
+        next: "score_generator"
+      
+      # DSPy node - generates quality score
+      score_generator:
+        type: "dspy"
+        output_key: "qc_evaluation"
+        dspy:
+          enabled: true
+          model: "openai/gpt-4o-mini"
+          max_tokens: 2000
+          module: "ChainOfThought"
+          signature:
+            input_fields:
+              chat_conversation: "Complete customer support chat conversation with all messages from end_user and support"
+              main_problem: "The main problem the customer is experiencing (from chat analysis)"
+            output_fields:
+              reasons: "List of 3-5 main reasons for the score. Each reason should be specific and actionable."
+              tone_score: "tone score as integer 1-10"
+              empathy_score: "empathy score as integer 1-10"
+              solution_quality: "solution quality as integer 1-10"
+              clarity_score: "clarity score as integer 1-10"
+            instructions: |
+              You are a QC analyst evaluating customer support quality. Rate the support agent's performance and explain your score.
+
+              Scoring criteria (1-10):
+              - 1-3: Major issues - agent failed to understand, help, or communicate effectively
+              - 4-6: Average - some issues but basic support was provided
+              - 7-8: Good - agent handled well with minor room for improvement
+              - 9-10: Excellent - agent exceeded expectations, clear communication, full resolution
+
+              Key evaluation areas:
+              1. Problem Understanding: Did the support agent correctly identify the end_user's issue?
+              2. Communication: Was the support agent clear, professional, and empathetic?
+              3. Resolution: Did the support agent solve or address the end_user's problem?
+              4. Process: Did the support agent follow proper support procedures?
+
+              CRITICAL - Agent Context Awareness:
+              - Support agents have access to internal systems and data NOT visible in the chat (transaction records, account status, payment confirmations, etc.).
+              - If the support agent states the problem is resolved or a transfer is confirmed based on data they can see, this is a VALID and APPROPRIATE response. Do NOT penalize for 'lack of investigation' — checking internal tools IS investigating.
+              - Do NOT treat the support agent confirming resolution from system data as 'claiming without evidence'. Their internal data IS the evidence.
+
+              CRITICAL - Follow-up Policy:
+              - These tickets are NOT expected to have follow-up. Do NOT penalize for not following up.
+
+              Output format:
+              - tone_score: Integer 1-10
+              - empathy_score: Integer 1-10
+              - solution_quality: Integer 1-10
+              - clarity_score: Integer 1-10
+              - reasons: List of 3-5 specific, actionable reasons for the score
+
+              IMPORTANT: The "reasons" field MUST be written in Persian (Farsi). Score fields remain as integers.
+          optimization:
+            enabled: true
+            teleprompter: "MIPRO"
+            metric: "score_proximity"
+            training_data_path: "data/training/qc_training_from_excel.json"
+            max_bootstrapped_demos: 8
+            max_labeled_demos: 6
+            num_candidates: 12
+        next: "score_calculator"
+
+      # Calculate final score from sub-scores using weighted formula
+      score_calculator:
+        type: "score_calculator"
+        output_key: "score"
+        formula:
+          tone_score: 0.2
+          empathy_score: 0.3
+          solution_quality: 0.3
+          clarity_score: 0.2
+        next: "__end__"
