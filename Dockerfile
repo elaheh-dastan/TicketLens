@@ -43,6 +43,7 @@ RUN find /usr/local -type d -name '__pycache__' -exec rm -r {} + 2>/dev/null || 
 
 RUN mkdir -p /tmp/prometheus_multiproc
 
-EXPOSE 9090
+# HTTP API port
+EXPOSE 8000
 
-CMD ["uv", "run", "--no-sync", "python", "scripts/run_qc_agent_kafka.py"]
+CMD ["uv", "run", "--no-sync", "uvicorn", "src.api.server:app", "--host", "0.0.0.0", "--port", "8000"]
