@@ -234,9 +234,20 @@ class LangfuseSettings(BaseConfigSettings):
         return rate
 
 
+class ApiSettings(BaseConfigSettings):
+    """HTTP API server configuration"""
+
+    host: str = Field(default="0.0.0.0", description="HTTP API bind host")
+    port: int = Field(default=8000, description="HTTP API port")
+    agent_config_path: str = Field(
+        default="agent_config/qc_agent.yml",
+        description="Path to the QC agent YAML configuration served over HTTP",
+    )
+
+
 class Settings(BaseConfigSettings):
     """Main settings class that combines all configurations"""
-    
+
     # Core settings
     environment: str = Field(default="development", description="Environment (development, staging, production)")
     debug: bool = Field(default=True, description="Debug mode")
@@ -245,6 +256,7 @@ class Settings(BaseConfigSettings):
     # Component configurations
     llms: LLMsSettings = Field(default_factory=LLMsSettings, description="LLM provider settings")
     kafka: KafkaSettings = Field(default_factory=KafkaSettings, description="Kafka settings")
+    api: ApiSettings = Field(default_factory=ApiSettings, description="HTTP API server settings")
     logging: LoggingSettings = Field(default_factory=LoggingSettings, description="Logging settings")
     langfuse: LangfuseSettings = Field(default_factory=LangfuseSettings, description="Langfuse observability settings")
     metrics: MetricsSettings = Field(default_factory=MetricsSettings, description="Prometheus metrics settings")

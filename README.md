@@ -27,8 +27,11 @@ cp .env.example .env
 ### 4. Run the API Server
 
 ```bash
-# Development mode
+# Development mode (auto-reload)
 uv run uvicorn src.api.server:app --reload --host 0.0.0.0 --port 8000
+
+# Or via the helper script
+uv run python scripts/run_qc_agent_http.py --port 8000
 
 # Production
 uvicorn src.api.server:app --workers 4 --host 0.0.0.0 --port 8000
@@ -37,13 +40,16 @@ uvicorn src.api.server:app --workers 4 --host 0.0.0.0 --port 8000
 ### 5. Call the QC API
 
 ```bash
-# Evaluate a support ticket (returns task_id for background processing)
+# Evaluate a support ticket -- the QC result is returned synchronously
 curl -X POST "http://localhost:8000/api/v2/qc/evaluate" \
   -H "Content-Type: application/json" \
-  -d '{"chat_id": "ticket-123", "chat_conversation": [...]}'
-
-# Check task status
-curl "http://localhost:8000/tasks/{task_id}"
+  -d '{
+        "chat_id": "ticket-123",
+        "chat_conversation": [
+          {"role": "customer", "message": "I cannot log in", "timestamp": "2026-01-01T00:00:00Z"},
+          {"role": "agent", "message": "Let me help you reset it", "timestamp": "2026-01-01T00:00:05Z"}
+        ]
+      }'
 
 # Health check
 curl "http://localhost:8000/health"
@@ -137,12 +143,15 @@ KAFKA__BOOTSTRAP_SERVERS=localhost:9092
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/v2/qc/evaluate` | Evaluate support ticket (returns task_id) |
-| POST | `/api/v2/qc/cancel/{task_id}` | Cancel running task |
-| GET | `/tasks/{task_id}` | Get task status |
-| GET | `/tasks` | List all tasks |
-| GET | `/health` | Health check |
-| GET | `/status` | Server status |
+| POST | `/api/v2/qc/evaluate` | Evaluate a support ticket; returns the QC result synchronously |
+| GET | `/health` | Liveness check |
+| GET | `/status` | Server status (version, agent readiness) |
+
+Interactive API docs (Swagger UI) are served at `/docs`.
+
+> Tickets can also be ingested from Kafka instead of HTTP -- see
+> `scripts/run_qc_agent_kafka.py`. The HTTP and Kafka paths share the same
+> agent via `src/service/qc_processor.py`.
 
 ## Testing
 

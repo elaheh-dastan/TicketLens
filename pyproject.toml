@@ -21,6 +21,8 @@ dependencies = [
   "fastavro>=1.12.1",
   "confluent-kafka[schema-registry]>=2.3.0",
   "prometheus-client>=0.21.0",
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.34.0",
 ]
 
 [project.optional-dependencies]
